@@ -82,6 +82,7 @@ class Battleship:
             for deck in ship_object.decks:
                 deck_tuple = (deck.row, deck.column)
                 self.field[deck_tuple] = ship_object
+        self._validate_field()
 
     def __repr__(self) -> str:
         return f"Battleship(ships={self.field.values()})"
@@ -119,13 +120,13 @@ class Battleship:
             print(row)
 
     def _validate_field(self) -> None:
-        if len(self.field) != 10:
+        if len(set(self.field.values())) != 10:
             raise ValueError("Invalid field configuration!")
         has_4_single_deck_ships = 0
         has_3_double_deck_ships = 0
         has_2_three_deck_ships = 0
         has_1_four_deck_ships = 0
-        for ship in list(self.field.values()):
+        for ship in set(self.field.values()):
             if len(ship.decks) == 1:
                 has_4_single_deck_ships += 1
             if len(ship.decks) == 2:
@@ -143,28 +144,30 @@ class Battleship:
         if has_1_four_deck_ships != 1:
             raise ValueError("there should be 1 four-deck ship!")
         for ship in list(self.field.values()):
-            one_up = (ship.deck.row - 1, ship.deck.column)
-            one_down = (ship.deck.row + 1, ship.deck.column)
-            one_left = (ship.deck.row, ship.deck.column - 1)
-            one_right = (ship.deck.row, ship.deck.column + 1)
-            one_left_up_diagonally = (ship.deck.row - 1, ship.deck.column - 1)
-            one_left_down_diagonally = (
-                ship.deck.row + 1, ship.deck.column - 1)
-            one_right_up_diagonally = (ship.deck.row - 1, ship.deck.column + 1)
-            one_right_down_diagonally = (
-                ship.deck.row + 1, ship.deck.column + 1)
-            all_sides = [
-                one_up,
-                one_down,
-                one_left,
-                one_right,
-                one_left_up_diagonally,
-                one_left_down_diagonally,
-                one_right_up_diagonally,
-                one_right_down_diagonally]
-            for other_ship in list(self.field.values()):
-                set_decks = set(other_ship.decks)
-                results = [deck in set_decks for deck in all_sides]
-                if any(results):
-                    raise ValueError(
-                        "ships shouldn't be located in the neighboring cells")
+            for deck in ship.decks:
+                one_up = Deck(deck.row - 1, deck.column)
+                one_down = Deck(deck.row + 1, deck.column)
+                one_left = Deck(deck.row, deck.column - 1)
+                one_right = Deck(deck.row, deck.column + 1)
+                one_left_up_diagonally = Deck(deck.row - 1, deck.column - 1)
+                one_left_down_diagonally = Deck(deck.row + 1, deck.column - 1)
+                one_right_up_diagonally = Deck(deck.row - 1, deck.column + 1)
+                one_right_down_diagonally = Deck(deck.row + 1, deck.column + 1)
+                all_sides = [
+                    one_up,
+                    one_down,
+                    one_left,
+                    one_right,
+                    one_left_up_diagonally,
+                    one_left_down_diagonally,
+                    one_right_up_diagonally,
+                    one_right_down_diagonally]
+                for other_ship in list(self.field.values()):
+                    if ship is other_ship:
+                        continue
+                    decks = other_ship.decks
+                    results = [deck in decks for deck in all_sides]
+                    if any(results):
+                        raise ValueError(
+                            "ships shouldn't"
+                            " be located in the neighboring cells")
