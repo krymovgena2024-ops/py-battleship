@@ -10,6 +10,7 @@ class Deck:
     def __eq__(self, other: Deck) -> bool:
         if isinstance(other, Deck):
             return self.row == other.row and self.column == other.column
+        return False
 
     def __repr__(self) -> str:
         return f"Deck({self.row}, {self.column})"
